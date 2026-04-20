@@ -46,3 +46,19 @@ export const reportsApi = {
   balanceSheet: (params) => api.get('/api/reports/balance-sheet', { params }).then((r) => r.data),
   cashFlow: (params) => api.get('/api/reports/cash-flow', { params }).then((r) => r.data),
 }
+
+export const importsApi = {
+  templateUrl: `${baseURL}/api/imports/transactions/template`,
+  preview: (file) => {
+    const fd = new FormData()
+    fd.append('file', file)
+    return api
+      .post('/api/imports/transactions/preview', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 60000,
+      })
+      .then((r) => r.data)
+  },
+  confirm: (rows) =>
+    api.post('/api/imports/transactions/confirm', { rows }).then((r) => r.data),
+}

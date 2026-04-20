@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { transactionsApi } from '../api/client'
+import { transactionsApi, importsApi } from '../api/client'
 import { useMetaStore } from '../stores'
 import { krw, today } from '../utils/format'
 
@@ -83,6 +83,70 @@ async function remove(id) {
   await load()
 }
 
+// --- 엑셀 임포트 ---
+const fileInput = ref(null)
+const importing = ref(false)
+const importError = ref('')
+const preview = ref(null) // { total, valid_count, error_count, rows }
+const showPreview = ref(false)
+
+function openFilePicker() {
+  importError.value = ''
+  fileInput.value?.click()
+}
+
+async function onFileSelected(e) {
+  const file = e.target.files?.[0]
+  if (!file) return
+  importing.value = true
+  importError.value = ''
+  try {
+    const res = await importsApi.preview(file)
+    preview.value = res
+    showPreview.value = true
+  } catch (err) {
+    importError.value = err.message
+  } finally {
+    importing.value = false
+    if (fileInput.value) fileInput.value.value = ''
+  }
+}
+
+function closePreview() {
+  showPreview.value = false
+  preview.value = null
+}
+
+async function confirmImport() {
+  if (!preview.value) return
+  const validRows = preview.value.rows
+    .filter((r) => r.valid)
+    .map((r) => ({
+      date: r.date,
+      type: r.type,
+      description: r.description,
+      amount: r.amount,
+      category_id: r.category_id,
+      memo: r.memo,
+    }))
+  if (!validRows.length) {
+    importError.value = '저장할 유효한 행이 없습니다'
+    return
+  }
+  importing.value = true
+  importError.value = ''
+  try {
+    const res = await importsApi.confirm(validRows)
+    closePreview()
+    alert(`${res.inserted}건이 저장되었습니다`)
+    await load()
+  } catch (err) {
+    importError.value = err.message
+  } finally {
+    importing.value = false
+  }
+}
+
 onMounted(async () => {
   await meta.loadCategories()
   await load()
@@ -163,9 +227,23 @@ onMounted(async () => {
 
     <!-- 목록 -->
     <div class="card">
-      <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
         <div class="text-base font-semibold">거래 목록 ({{ items.length }})</div>
+        <div class="flex items-center gap-2">
+          <a :href="importsApi.templateUrl" class="btn-secondary" download>템플릿 다운로드</a>
+          <button class="btn-primary" :disabled="importing" @click="openFilePicker">
+            {{ importing ? '처리 중...' : '엑셀 업로드' }}
+          </button>
+          <input
+            ref="fileInput"
+            type="file"
+            accept=".xlsx,.xls"
+            class="hidden"
+            @change="onFileSelected"
+          />
+        </div>
       </div>
+      <div v-if="importError" class="text-red-600 text-sm mb-2">{{ importError }}</div>
       <div class="overflow-x-auto">
         <table class="table">
           <thead>
@@ -198,6 +276,78 @@ onMounted(async () => {
             </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- 엑셀 임포트 미리보기 모달 -->
+    <div
+      v-if="showPreview && preview"
+      class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+      @click.self="closePreview"
+    >
+      <div class="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] flex flex-col">
+        <div class="px-5 py-3 border-b flex items-center justify-between">
+          <div class="text-base font-semibold">임포트 미리보기</div>
+          <button class="text-slate-500 hover:text-slate-800" @click="closePreview">✕</button>
+        </div>
+        <div class="px-5 py-3 bg-slate-50 border-b flex flex-wrap gap-4 text-sm">
+          <span>전체: <b>{{ preview.total }}</b>건</span>
+          <span class="text-emerald-600">유효: <b>{{ preview.valid_count }}</b>건</span>
+          <span class="text-red-600">오류: <b>{{ preview.error_count }}</b>건</span>
+          <span class="text-slate-500 ml-auto">유효한 행만 저장됩니다</span>
+        </div>
+        <div class="overflow-auto flex-1 px-5 py-3">
+          <table class="table text-sm">
+            <thead>
+              <tr>
+                <th class="w-12">행</th>
+                <th>날짜</th>
+                <th>구분</th>
+                <th>내용</th>
+                <th class="text-right">금액</th>
+                <th>카테고리</th>
+                <th>메모</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="r in preview.rows"
+                :key="r.row_number"
+                :class="r.valid ? '' : 'bg-red-50'"
+              >
+                <td class="text-slate-500">{{ r.row_number }}</td>
+                <td>{{ r.date || '-' }}</td>
+                <td>
+                  <span v-if="r.type === 'INCOME'" class="badge-income">수입</span>
+                  <span v-else-if="r.type === 'EXPENSE'" class="badge-expense">지출</span>
+                  <span v-else>-</span>
+                </td>
+                <td>{{ r.description || '-' }}</td>
+                <td class="text-right">{{ r.amount ? krw(r.amount) : '-' }}</td>
+                <td>{{ r.category_name || '-' }}</td>
+                <td class="text-slate-500">{{ r.memo || '-' }}</td>
+                <td>
+                  <span v-if="r.valid" class="text-emerald-600 text-xs">✓ 유효</span>
+                  <span v-else class="text-red-600 text-xs">{{ r.errors.join(', ') }}</span>
+                </td>
+              </tr>
+              <tr v-if="!preview.rows.length">
+                <td colspan="8" class="text-center text-slate-400 py-6">데이터가 없습니다</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="px-5 py-3 border-t flex items-center justify-end gap-2">
+          <button class="btn-secondary" @click="closePreview">취소</button>
+          <button
+            class="btn-primary"
+            :disabled="importing || !preview.valid_count"
+            @click="confirmImport"
+          >
+            {{ importing ? '저장 중...' : `${preview.valid_count}건 저장` }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
