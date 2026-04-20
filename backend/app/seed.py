@@ -75,13 +75,21 @@ def seed():
             today = date.today()
             random.seed(42)
             count = 0
+
+            def sample_date(base_date: date) -> date:
+                # 미래 날짜 방지: 생성일은 base_date ~ today 범위로 클램핑
+                max_offset = 27 if base_date.month != today.month or base_date.year != today.year else max(today.day - base_date.day, 0)
+                if max_offset <= 0:
+                    return base_date
+                return base_date + timedelta(days=random.randint(0, max_offset))
+
             for month_back in range(6):
                 base = today.replace(day=1) - timedelta(days=month_back * 30)
                 # 수입 3건
                 for _ in range(3):
                     c = random.choice(income_cats)
                     db.add(models.Transaction(
-                        date=base + timedelta(days=random.randint(0, 27)),
+                        date=sample_date(base),
                         description=f"{c.name} 입금",
                         amount=Decimal(random.randint(500, 5000) * 1000),
                         type=models.TransactionType.INCOME,
@@ -92,7 +100,7 @@ def seed():
                 for _ in range(8):
                     c = random.choice(expense_cats)
                     db.add(models.Transaction(
-                        date=base + timedelta(days=random.randint(0, 27)),
+                        date=sample_date(base),
                         description=f"{c.name} 지출",
                         amount=Decimal(random.randint(10, 800) * 1000),
                         type=models.TransactionType.EXPENSE,
