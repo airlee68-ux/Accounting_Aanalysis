@@ -68,16 +68,16 @@ const expenseByCategory = computed(() => {
       <!-- KPI -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="card">
-          <div class="text-sm text-slate-500">총 수입</div>
-          <div class="text-2xl font-bold text-emerald-600 mt-1">{{ krw(data.total_income) }}</div>
+          <div class="text-sm muted">총 수입</div>
+          <div class="text-2xl font-bold text-emerald-600 mt-1 num">{{ krw(data.total_income) }}</div>
         </div>
         <div class="card">
-          <div class="text-sm text-slate-500">총 지출</div>
-          <div class="text-2xl font-bold text-red-600 mt-1">{{ krw(data.total_expense) }}</div>
+          <div class="text-sm muted">총 지출</div>
+          <div class="text-2xl font-bold text-red-600 mt-1 num">{{ krw(data.total_expense) }}</div>
         </div>
         <div class="card">
-          <div class="text-sm text-slate-500">순이익</div>
-          <div class="text-2xl font-bold mt-1" :class="Number(data.net) >= 0 ? 'text-brand-600' : 'text-red-600'">
+          <div class="text-sm muted">순이익</div>
+          <div class="text-2xl font-bold mt-1 num" :class="Number(data.net) >= 0 ? 'text-brand-600' : 'text-red-600'">
             {{ krw(data.net) }}
           </div>
         </div>
@@ -86,11 +86,11 @@ const expenseByCategory = computed(() => {
       <!-- 차트 -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div class="card lg:col-span-2">
-          <div class="text-base font-semibold mb-3">월별 수입·지출</div>
+          <div class="section-title mb-3">월별 수입·지출</div>
           <BarChart :data="monthlyChart" />
         </div>
         <div class="card">
-          <div class="text-base font-semibold mb-3">지출 카테고리 비중</div>
+          <div class="section-title mb-3">지출 카테고리 비중</div>
           <DoughnutChart v-if="expenseByCategory.labels.length" :data="expenseByCategory" />
           <div v-else class="text-sm text-slate-400 py-10 text-center">데이터가 없습니다</div>
         </div>
@@ -98,7 +98,7 @@ const expenseByCategory = computed(() => {
 
       <!-- 최근 거래 -->
       <div class="card">
-        <div class="text-base font-semibold mb-3">최근 거래</div>
+        <div class="section-title mb-3">최근 거래</div>
         <table class="table">
           <thead>
             <tr>
@@ -115,7 +115,7 @@ const expenseByCategory = computed(() => {
                   {{ t.type === 'INCOME' ? '수입' : '지출' }}
                 </span>
               </td>
-              <td class="text-right font-medium" :class="t.type === 'INCOME' ? 'text-emerald-600' : 'text-red-600'">
+              <td class="text-right font-medium num" :class="t.type === 'INCOME' ? 'text-emerald-600' : 'text-red-600'">
                 {{ krw(t.amount) }}
               </td>
             </tr>

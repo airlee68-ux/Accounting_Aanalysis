@@ -41,39 +41,39 @@ const chart = computed(() => {
     <div v-if="data" class="space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="card">
-          <div class="text-sm text-slate-500">총 유입</div>
-          <div class="text-2xl font-bold text-emerald-600 mt-1">{{ krw(data.total_inflow) }}</div>
+          <div class="text-sm muted">총 유입</div>
+          <div class="text-2xl font-bold text-emerald-600 mt-1 num">{{ krw(data.total_inflow) }}</div>
         </div>
         <div class="card">
-          <div class="text-sm text-slate-500">총 유출</div>
-          <div class="text-2xl font-bold text-red-600 mt-1">{{ krw(data.total_outflow) }}</div>
+          <div class="text-sm muted">총 유출</div>
+          <div class="text-2xl font-bold text-red-600 mt-1 num">{{ krw(data.total_outflow) }}</div>
         </div>
         <div class="card">
-          <div class="text-sm text-slate-500">순현금흐름</div>
-          <div class="text-2xl font-bold mt-1" :class="Number(data.net) >= 0 ? 'text-brand-600' : 'text-red-600'">
+          <div class="text-sm muted">순현금흐름</div>
+          <div class="text-2xl font-bold mt-1 num" :class="Number(data.net) >= 0 ? 'text-brand-600' : 'text-red-600'">
             {{ krw(data.net) }}
           </div>
         </div>
       </div>
 
       <div class="card">
-        <div class="text-base font-semibold mb-3">월별 현금흐름</div>
+        <div class="section-title mb-3">월별 현금흐름</div>
         <LineChart v-if="data.rows.length" :data="chart" />
         <div v-else class="text-center text-slate-400 py-10">데이터가 없습니다</div>
       </div>
 
       <div class="card">
-        <div class="text-base font-semibold mb-3">월별 상세</div>
+        <div class="section-title mb-3">월별 상세</div>
         <table class="table">
           <thead>
             <tr><th>월</th><th class="text-right">유입</th><th class="text-right">유출</th><th class="text-right">순흐름</th></tr>
           </thead>
           <tbody>
             <tr v-for="r in data.rows" :key="r.month">
-              <td>{{ r.month }}</td>
-              <td class="text-right text-emerald-600">{{ krw(r.inflow) }}</td>
-              <td class="text-right text-red-600">{{ krw(r.outflow) }}</td>
-              <td class="text-right font-medium" :class="Number(r.net) >= 0 ? 'text-brand-600' : 'text-red-600'">
+              <td class="num">{{ r.month }}</td>
+              <td class="text-right text-emerald-600 num">{{ krw(r.inflow) }}</td>
+              <td class="text-right text-red-600 num">{{ krw(r.outflow) }}</td>
+              <td class="text-right font-medium num" :class="Number(r.net) >= 0 ? 'text-brand-600' : 'text-red-600'">
                 {{ krw(r.net) }}
               </td>
             </tr>

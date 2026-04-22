@@ -157,7 +157,7 @@ onMounted(async () => {
   <div class="space-y-6">
     <!-- 입력 폼 -->
     <div class="card">
-      <div class="text-base font-semibold mb-3">{{ editingId ? '거래 수정' : '거래 등록' }}</div>
+      <div class="section-title mb-3">{{ editingId ? '거래 수정' : '거래 등록' }}</div>
       <div class="grid grid-cols-1 md:grid-cols-6 gap-3">
         <div>
           <label class="label">날짜</label>
@@ -228,7 +228,7 @@ onMounted(async () => {
     <!-- 목록 -->
     <div class="card">
       <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
-        <div class="text-base font-semibold">거래 목록 ({{ items.length }})</div>
+        <div class="section-title">거래 목록 ({{ items.length }})</div>
         <div class="flex items-center gap-2">
           <a :href="importsApi.templateUrl" class="btn-secondary" download>템플릿 다운로드</a>
           <button class="btn-primary" :disabled="importing" @click="openFilePicker">
@@ -262,10 +262,10 @@ onMounted(async () => {
                   {{ t.type === 'INCOME' ? '수입' : '지출' }}
                 </span>
               </td>
-              <td class="text-right font-medium" :class="t.type === 'INCOME' ? 'text-emerald-600' : 'text-red-600'">
+              <td class="text-right font-medium num" :class="t.type === 'INCOME' ? 'text-emerald-600' : 'text-red-600'">
                 {{ krw(t.amount) }}
               </td>
-              <td class="text-slate-500">{{ t.memo || '-' }}</td>
+              <td class="muted">{{ t.memo || '-' }}</td>
               <td class="text-right whitespace-nowrap">
                 <button class="btn-secondary mr-1" @click="edit(t)">수정</button>
                 <button class="btn-danger" @click="remove(t.id)">삭제</button>
@@ -287,7 +287,7 @@ onMounted(async () => {
     >
       <div class="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] flex flex-col">
         <div class="px-5 py-3 border-b flex items-center justify-between">
-          <div class="text-base font-semibold">임포트 미리보기</div>
+          <div class="section-title">임포트 미리보기</div>
           <button class="text-slate-500 hover:text-slate-800" @click="closePreview">✕</button>
         </div>
         <div class="px-5 py-3 bg-slate-50 border-b flex flex-wrap gap-4 text-sm">
@@ -316,7 +316,7 @@ onMounted(async () => {
                 :key="r.row_number"
                 :class="r.valid ? '' : 'bg-red-50'"
               >
-                <td class="text-slate-500">{{ r.row_number }}</td>
+                <td class="muted num">{{ r.row_number }}</td>
                 <td>{{ r.date || '-' }}</td>
                 <td>
                   <span v-if="r.type === 'INCOME'" class="badge-income">수입</span>
@@ -324,9 +324,9 @@ onMounted(async () => {
                   <span v-else>-</span>
                 </td>
                 <td>{{ r.description || '-' }}</td>
-                <td class="text-right">{{ r.amount ? krw(r.amount) : '-' }}</td>
+                <td class="text-right num">{{ r.amount ? krw(r.amount) : '-' }}</td>
                 <td>{{ r.category_name || '-' }}</td>
-                <td class="text-slate-500">{{ r.memo || '-' }}</td>
+                <td class="muted">{{ r.memo || '-' }}</td>
                 <td>
                   <span v-if="r.valid" class="text-emerald-600 text-xs">✓ 유효</span>
                   <span v-else class="text-red-600 text-xs">{{ r.errors.join(', ') }}</span>

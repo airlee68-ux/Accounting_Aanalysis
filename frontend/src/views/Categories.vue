@@ -33,7 +33,7 @@ onMounted(load)
 <template>
   <div class="space-y-6">
     <div class="card">
-      <div class="text-base font-semibold mb-3">카테고리 추가</div>
+      <div class="section-title mb-3">카테고리 추가</div>
       <div class="flex gap-2">
         <select v-model="form.type" class="input max-w-[120px]">
           <option value="INCOME">수입</option>
@@ -46,7 +46,7 @@ onMounted(load)
     </div>
 
     <div class="card">
-      <div class="text-base font-semibold mb-3">카테고리 목록</div>
+      <div class="section-title mb-3">카테고리 목록</div>
       <table class="table">
         <thead>
           <tr><th>구분</th><th>이름</th><th class="w-24"></th></tr>

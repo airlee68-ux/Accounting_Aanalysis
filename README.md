@@ -104,7 +104,7 @@ npm run dev
 - `RENDER_DEPLOY_HOOK_URL` - Render Deploy Hook URL
 - `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`
 
-`main` 브랜치 push 시 자동 배포됩니다...........
+`main` 브랜치 push 시 자동 배포됩니다.
 
 ## 주요 API
 
