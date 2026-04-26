@@ -90,6 +90,10 @@ class IncomeStatementRow(BaseModel):
 
 
 class IncomeStatement(BaseModel):
+    """K-IFRS 기능별 손익계산서.
+
+    revenue/expense는 전체 합계(하위호환)이며, IFRS 표시를 위해 단계별 소계를 별도 필드로 제공.
+    """
     period_start: date
     period_end: date
     revenue: list[IncomeStatementRow]
@@ -97,15 +101,27 @@ class IncomeStatement(BaseModel):
     total_revenue: Decimal
     total_expense: Decimal
     net_income: Decimal
+    # IFRS 단계별 손익
+    sales: Decimal = Decimal("0")              # 매출액
+    cogs: Decimal = Decimal("0")               # 매출원가
+    gross_profit: Decimal = Decimal("0")       # 매출총이익
+    sga: Decimal = Decimal("0")                # 판매비와관리비
+    operating_profit: Decimal = Decimal("0")   # 영업이익
+    other_income: Decimal = Decimal("0")       # 기타수익(영업외수익)
+    finance_cost: Decimal = Decimal("0")       # 금융원가
+    profit_before_tax: Decimal = Decimal("0")  # 법인세비용차감전순이익
+    income_tax: Decimal = Decimal("0")         # 법인세비용
 
 
 class BalanceSheetRow(BaseModel):
     account: str
     type: AccountType
     balance: Decimal
+    classification: Optional[str] = None  # current / non_current / paid_in / retained / oci
 
 
 class BalanceSheet(BaseModel):
+    """K-IFRS 재무상태표 — 유동/비유동 구분."""
     as_of: date
     assets: list[BalanceSheetRow]
     liabilities: list[BalanceSheetRow]
@@ -113,6 +129,11 @@ class BalanceSheet(BaseModel):
     total_assets: Decimal
     total_liabilities: Decimal
     total_equity: Decimal
+    # IFRS 유동성 구분 소계
+    current_assets: Decimal = Decimal("0")
+    non_current_assets: Decimal = Decimal("0")
+    current_liabilities: Decimal = Decimal("0")
+    non_current_liabilities: Decimal = Decimal("0")
 
 
 class CashFlowRow(BaseModel):
