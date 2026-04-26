@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
 from .database import Base, engine
-from .routers import accounts, categories, transactions, reports, imports
+from .routers import accounts, categories, transactions, reports, imports, admin
 from . import models  # noqa: F401  -- ensure models are registered
 
 
@@ -47,3 +47,4 @@ app.include_router(categories.router)
 app.include_router(transactions.router)
 app.include_router(reports.router)
 app.include_router(imports.router)
+app.include_router(admin.router)
